@@ -83,7 +83,6 @@ class Staff(models.Model): # Работники салона
     service_type = models.CharField(max_length=100)
     work_experience = models.CharField(max_length=100)
     review = models.TextField()
-
     def __str__(self):
         return self.name
 
@@ -95,6 +94,14 @@ class Staff(models.Model): # Работники салона
     def reviews(self):
         reviews = StaffReview.objects.filter(staff = self)
         return [{'id': i.id, 'text': i.text, 'stars': i.stars, 'user_id': i.user.id, 'user_name': i.user.name} for i in reviews]
+
+
+class StaffService(models.Model):
+    staff = models.ForeignKey(Staff, on_delete=models.CASCADE)
+
+    title = models.CharField(max_length=100)
+    price = models.IntegerField()
+    duration = models.TimeField()
 
 
 Monday = 0
