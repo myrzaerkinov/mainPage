@@ -52,29 +52,6 @@ class SalonReview(models.Model): # Отзывы салона
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
-# SERVICE_TITLE =[
-#     ('B', 'B'),
-#     ('C', 'C')
-# ]
-SERVICE_TYPE = [
-    ('Фиксированная','Фиксированная'),
-    ('Динамеческая', 'Динамечиская')
-]
-class SalonService(models.Model): # Услуги салона
-    title = models.CharField(max_length=100)
-    type = models.CharField(max_length=100, choices=SERVICE_TYPE)
-    duration = models.TimeField()
-    price = models.IntegerField() 
-    price_2 = models.IntegerField(null=True, blank=True)
-    # Цена зависит от типа если динамическая то цена от и до а если фиксированная тогда фиксированная
-    # Поэтому две цены если фиксированная тогда выводим только 1 а если динамическая тогда 2 от и до
-    # Если захотите сделать по другому делайте только скажите нам когда будите менять модельки
-
-    salon = models.ForeignKey(BusinessAccount, on_delete=models.CASCADE, related_name='salon_services')
-
-    def __str__(self):
-        return self.title
-
 class Staff(models.Model): # Работники салона
     salon = models.ForeignKey(BusinessAccount, on_delete=models.CASCADE, null=True)
     avatar = models.ImageField(upload_to="")
@@ -95,13 +72,29 @@ class Staff(models.Model): # Работники салона
         reviews = StaffReview.objects.filter(staff = self)
         return [{'id': i.id, 'text': i.text, 'stars': i.stars, 'user_id': i.user.id, 'user_name': i.user.name} for i in reviews]
 
-
-class StaffService(models.Model):
-    staff = models.ForeignKey(Staff, on_delete=models.CASCADE)
-
+# SERVICE_TITLE =[
+#     ('B', 'B'),
+#     ('C', 'C')
+# ]
+SERVICE_TYPE = [
+    ('Фиксированная','Фиксированная'),
+    ('Динамеческая', 'Динамечиская')
+]
+class SalonService(models.Model): # Услуги салона
     title = models.CharField(max_length=100)
-    price = models.IntegerField()
+    type = models.CharField(max_length=100, choices=SERVICE_TYPE)
     duration = models.TimeField()
+    price = models.IntegerField() 
+    price_2 = models.IntegerField(null=True, blank=True)
+    # Цена зависит от типа если динамическая то цена от и до а если фиксированная тогда фиксированная
+    # Поэтому две цены если фиксированная тогда выводим только 1 а если динамическая тогда 2 от и до
+    # Если захотите сделать по другому делайте только скажите нам когда будите менять модельки
+
+    salon = models.ForeignKey(BusinessAccount, on_delete=models.CASCADE, related_name='salon_services')
+    staff = models.ManyToManyField(Staff, blank=True)
+    # Услуга привязана к салону и к работникам которые могут сделать эту услугу
+    def __str__(self):
+        return self.title
 
 
 Monday = 0
