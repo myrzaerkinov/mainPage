@@ -1,6 +1,7 @@
+from datetime import datetime
+from tkinter import CASCADE
 from django.db import models
 from user.models import User
-
 
 
 class BusinessAccount(models.Model): # Аккаунт салона
@@ -18,7 +19,7 @@ class BusinessAccount(models.Model): # Аккаунт салона
 
     @property
     def services(self): # Услуги салона
-        review = SalonService.objects.filter(businessaccounts = self)
+        review = SalonService.objects.filter(businessaccount = self)
         return [{'id': i.id, 'title': i.title,} for i in review]
 
     @property
@@ -32,7 +33,7 @@ class BusinessAccount(models.Model): # Аккаунт салона
 
     @property
     def reviews(self): # Отзывы
-        reviews = SalonReview.objects.filter(businessaccounts = self)
+        reviews = SalonReview.objects.filter(businessaccount = self)
         return [{'id': i.id, 'text': i.text, 'stars': i.stars, 'user_id': i.user.id, 'user_name': i.user.name} for i in reviews]
     
     
@@ -63,19 +64,20 @@ class Staff(models.Model): # Работники салона
     def __str__(self):
         return self.name
 
-    def workday(self):
-        workday = StaffTimetable.objects.all()
-        # return
+    @property
+    def stafftimetable(self):
+        workday = StaffTimetable.objects.filter(staff = self)
+        return [{'id': i.id, 'time_records': i.time_records}for i in workday]
+
 
     @property
     def reviews(self):
         reviews = StaffReview.objects.filter(staff = self)
         return [{'id': i.id, 'text': i.text, 'stars': i.stars, 'user_id': i.user.id, 'user_name': i.user.name} for i in reviews]
 
-# SERVICE_TITLE =[
-#     ('B', 'B'),
-#     ('C', 'C')
-# ]
+
+
+
 SERVICE_TYPE = [
     ('Фиксированная','Фиксированная'),
     ('Динамеческая', 'Динамечиская')
@@ -115,16 +117,24 @@ class StaffTimetable(models.Model): # Расписание работников
         (Saturday, 'Saturday'),
         (Sunday, 'Sunday')
     )
-    DAY_TYPES = (
-        ('weekday', 'weekday'),
-        ('holiday', 'holiday'),
-    )
     staff = models.ForeignKey(Staff, on_delete=models.CASCADE)
-
-    day_week = models.PositiveIntegerField(choices=DAYS_OF_WEEK)
+    day_off = models.PositiveIntegerField(choices=DAYS_OF_WEEK)
     start_time = models.TimeField()
     end_time = models.TimeField()
-    day_type = models.CharField(max_length=255,choices=DAY_TYPES)
+
+    def __str__(self):
+        return self.staff.name
+
+class TimeRecords(models.Model):
+    staff = models.ForeignKey(Staff, on_delete=models.CASCADE)
+
+    time =models.TimeField()
+
+
+
+    
+
+
 
 
 class Interior(models.Model): # Картинки салона
@@ -142,3 +152,30 @@ class StaffReview(models.Model): # Не знаю зачем но отдельн�
     stars = models.CharField(max_length=100, choices=STARS, null=True)
     
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+STATUS_TYPE = [
+    ("На прием", "На прием"),
+    ("Подтвержден", "Подтвержден")
+]
+class Records(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    data = models.DateField()
+    time = models.TimeField()
+    discount = models.TimeField(null=True, blank=True)
+    price = models.IntegerField()
+    promo_code = models.CharField(max_length=10, null=True, blank=True)
+    status = models.CharField(choices=STATUS_TYPE, max_length=100, default="На прием")
+    businessaccount = models.ForeignKey(BusinessAccount, on_delete=models.CASCADE, null=True, blank=True)
+    staff = models.ForeignKey(Staff, on_delete=models.CASCADE)
+    service = models.ForeignKey(SalonService, on_delete=models.CASCADE)
+
+
+    @property
+    def staff_info(self):
+        return {'id': self.staff.id, 'name': self.staff.name}
+
+class PromoCode(models.Model):
+    promo_code = models.CharField(max_length=10)
+
+    discount = models.IntegerField()

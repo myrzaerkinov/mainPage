@@ -1,14 +1,25 @@
+from secrets import choice
 from django.forms import ValidationError
 from rest_framework import serializers
-from . import models
 from user.models import User
-from business_accounts.models import Staff, SalonService
+from business_accounts.models import Staff, SalonService, Records, BusinessAccount
 
+
+class BusinessAccountAPIViewSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = BusinessAccount
+        fields = '__all__'
+
+class ListUserRecordsAPIViewSerializers(serializers.ModelSerializer):
+    businessaccount = BusinessAccountAPIViewSerializers()
+    class Meta:
+        model = Records
+        fields = 'businessaccount id id data time price promo_code status discount staff_info'.split()
 
 class RecordsSerializers(serializers.ModelSerializer):
     class Meta:
-        model = models.Records
-        fields = '__all__'
+        model = Records
+        fields = 'id data time price promo_code status salon staff_info service_info discount'.split()
 
 
 class CreateRecordsAPIViewSerializer(serializers.Serializer):
@@ -16,8 +27,6 @@ class CreateRecordsAPIViewSerializer(serializers.Serializer):
 
     data = serializers.DateField()
     time = serializers.TimeField()
-    price = serializers.IntegerField()
-
     staff_id = serializers.IntegerField()
     service_id = serializers.IntegerField()
 
@@ -41,3 +50,5 @@ class CreateRecordsAPIViewSerializer(serializers.Serializer):
         except:
             raise ValidationError(f'ID Error')
         return id
+
+        
