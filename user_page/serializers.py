@@ -17,12 +17,12 @@ class SalonReviewAPIViewSerializers(serializers.ModelSerializer):
 
 class BusinessAccountAPIViewSerializers(serializers.ModelSerializer):
     category = serializers.SerializerMethodField()
-    reviews = serializers.SerializerMethodField()
+    # reviews = serializers.SerializerMethodField()
     # reviews = SalonReviewAPIViewSerializers()
 
     class Meta:
         model = BusinessAccount
-        fields = 'id title reviews rating category'.split()
+        fields = 'id title rating category'.split()
 
     def get_category(self, salon):
         try:
