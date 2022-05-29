@@ -3,17 +3,23 @@ from tkinter import CASCADE
 from django.db import models
 from user.models import User
 
+class Category(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
 
 class BusinessAccount(models.Model): # Аккаунт салона
     admin = models.ForeignKey(User, on_delete=models.CASCADE) # Админ который привязан к салону и может вносить изменения 
     title = models.CharField(max_length=100)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
     start_time = models.CharField(max_length=5) # начало работы салона
     end_time = models.CharField(max_length=5) # конец работы салона
     address = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=50)
     email = models.CharField(max_length=100)
     avatar = models.ImageField(upload_to="") # главная фотка салона
-    
+
     def __str__(self):
         return self.title
 
@@ -27,8 +33,12 @@ class BusinessAccount(models.Model): # Аккаунт салона
         p = 0
         for i in self.salon_reviews.all():
             p += int(i.stars)
-        return p/self.salon_reviews.all().count()
-        # return SalonReviews.objects.filter(businessaccounts = self).aggregate(Avg('stars'))
+        try:
+            return p/self.salon_reviews.all().count()
+        except:
+            return 0
+
+        # return SalonReview.objects.filter(businessaccounts = self).aggregate(Avg('stars'))
 
 
     @property
@@ -52,6 +62,8 @@ class SalonReview(models.Model): # Отзывы салона
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.salon.title
 
 class Staff(models.Model): # Работники салона
     salon = models.ForeignKey(BusinessAccount, on_delete=models.CASCADE, null=True)

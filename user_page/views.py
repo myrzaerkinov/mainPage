@@ -3,8 +3,11 @@ from rest_framework.response import Response
 from . import serializers
 from rest_framework import status
 from datetime import datetime
-from business_accounts.models import SalonService, Staff, Records, PromoCode, TimeRecords, StaffTimetable
+from business_accounts.models import SalonService,\
+    Staff, Records, PromoCode, TimeRecords, StaffTimetable, BusinessAccount
 import calendar
+from django.db.models import Avg, Count
+
 
 class CreateListRecordsAPIView(APIView):
     def get(self, request):
@@ -24,6 +27,8 @@ class CreateListRecordsAPIView(APIView):
         businessaccount_id = request.data.get('businessaccount_id')
         promo_code = request.data.get('promo_code')
         service = SalonService.objects.get(id = service_id)
+
+
         if promo_code == None:
             price = service.price
             discount = 0
@@ -80,4 +85,12 @@ class ListUserRecordsAPIView(APIView):
     def get(self, request, id):
         model = Records.objects.filter(staff_id=id)
         data = serializers.ListUserRecordsAPIViewSerializers(model, many=True).data
+        return Response(data=data)
+
+
+class SalonListAPIView(APIView):
+    def get(self, request):
+        model = BusinessAccount.objects.annotate(review=Count('salon_reviews')
+                                                 ).order_by('-review')
+        data = serializers.BusinessAccountAPIViewSerializers(model, many=True).data
         return Response(data=data)

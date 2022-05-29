@@ -2,16 +2,40 @@ from secrets import choice
 from django.forms import ValidationError
 from rest_framework import serializers
 from user.models import User
-from business_accounts.models import Staff, SalonService, Records, BusinessAccount
+from business_accounts.models import Staff,\
+    SalonService, Records, BusinessAccount, Category, SalonReview
 
-
-class BusinessAccountAPIViewSerializers(serializers.ModelSerializer):
+class CategoryAPIViewSerializers(serializers.ModelSerializer):
     class Meta:
-        model = BusinessAccount
+        model = Category
+        fields = 'id name'.split()
+
+class SalonReviewAPIViewSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = SalonReview
         fields = '__all__'
 
+class BusinessAccountAPIViewSerializers(serializers.ModelSerializer):
+    category = serializers.SerializerMethodField()
+    reviews = serializers.SerializerMethodField()
+    # reviews = SalonReviewAPIViewSerializers()
+
+    class Meta:
+        model = BusinessAccount
+        fields = 'id title reviews rating category'.split()
+
+    def get_category(self, salon):
+        try:
+            return salon.category.name
+        except:
+            return 'No category'
+
+    def get_reviews(self, stars):
+        serializer = SalonReviewAPIViewSerializers(SalonReview.objects.all(), many=True)
+        return serializer.data
+
 class ListUserRecordsAPIViewSerializers(serializers.ModelSerializer):
-    businessaccount = BusinessAccountAPIViewSerializers()
+    businessaccount = BusinessAccountAPIViewSerializers
     class Meta:
         model = Records
         fields = 'businessaccount id id data time price promo_code status discount staff_info'.split()
@@ -24,7 +48,6 @@ class RecordsSerializers(serializers.ModelSerializer):
 
 class CreateRecordsAPIViewSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
-
     data = serializers.DateField()
     time = serializers.TimeField()
     staff_id = serializers.IntegerField()
@@ -50,5 +73,3 @@ class CreateRecordsAPIViewSerializer(serializers.Serializer):
         except:
             raise ValidationError(f'ID Error')
         return id
-
-        
