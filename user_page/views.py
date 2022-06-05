@@ -4,10 +4,10 @@ from . import serializers
 from rest_framework import status
 from datetime import datetime
 from business_accounts.models import SalonService,\
-    Staff, Records, PromoCode, TimeRecords, StaffTimetable, BusinessAccount
+    Staff, Records, PromoCode, TimeRecords, StaffTimetable, BusinessAccount, Category
 import calendar
 from django.db.models import Avg, Count
-
+from rest_framework import viewsets
 
 class CreateListRecordsAPIView(APIView):
     def get(self, request):
@@ -87,6 +87,17 @@ class ListUserRecordsAPIView(APIView):
         data = serializers.ListUserRecordsAPIViewSerializers(model, many=True).data
         return Response(data=data)
 
+class ListCategoryAPIView(APIView):
+    def get(self, request, id):
+        model = Category.objects.filter(id=id)
+        data = serializers.CategoryAPIViewSerializers(model, many=True).data
+        return Response(data=data)
+
+class CategoryListAPIView(APIView):
+    def get(self, request):
+        model = Category.objects.all()
+        data = serializers.CategoryAPIViewSerializers(model, many=True).data
+        return Response(data=data)
 
 class SalonListAPIView(APIView):
     def get(self, request):
