@@ -5,7 +5,17 @@ from user.models import User
 from business_accounts.models import Staff,\
     SalonService, Records, BusinessAccount, Category, SalonReview
 
+class CategoryAPIViewSerializers(serializers.ModelSerializer):
+    businessaccount = serializers.SerializerMethodField()
 
+    class Meta:
+        model = Category
+        fields = 'id name businessaccount'.split()
+
+    def get_businessaccount(self, category):
+        serializer = BusinessAccountAPIViewSerializers(BusinessAccount.objects.filter(category=category),
+                                                       many=True)
+        return serializer.data
 
 class SalonReviewAPIViewSerializers(serializers.ModelSerializer):
     class Meta:
@@ -24,11 +34,6 @@ class BusinessAccountAPIViewSerializers(serializers.ModelSerializer):
             return salon.category.name
         except:
             return 'No category'
-
-class CategoryAPIViewSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = 'id name'.split()
 
 class ListUserRecordsAPIViewSerializers(serializers.ModelSerializer):
     businessaccount = BusinessAccountAPIViewSerializers

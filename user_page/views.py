@@ -101,7 +101,7 @@ class CategoryListAPIView(APIView):
 
 class SalonListAPIView(APIView):
     def get(self, request):
-        model = BusinessAccount.objects.annotate(review=Count('salon_reviews')
-                                                 ).order_by('-review')
+        model = BusinessAccount.objects.annotate(rtg=Count('category')
+                                               ).order_by('-rtg')
         data = serializers.BusinessAccountAPIViewSerializers(model, many=True).data
         return Response(data=data)
