@@ -109,7 +109,7 @@ class ListSalonAPIView(APIView):
 
 class SalonListAPIView(APIView):
     def get(self, request):
-        model = BusinessAccount.objects.annotate(rtg=Count('category')
+        model = BusinessAccount.objects.annotate(rtg=Count('rating')
                                                ).order_by('-rtg')
         data = serializers.BusinessAccountAPIViewSerializers(model, many=True).data
         return Response(data=data)
@@ -118,4 +118,4 @@ from user_page.serializers import BusinessAccountAPIViewSerializers
 class SearchSalonAPIView(ListCreateAPIView):
     queryset = BusinessAccount.objects.all()
     serializer_class = BusinessAccountAPIViewSerializers
-    filter_fields = ['category']
+    filter_fields = ['*']
