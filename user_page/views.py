@@ -8,6 +8,8 @@ from business_accounts.models import SalonService,\
 import calendar
 from django.db.models import Avg, Count
 from rest_framework import viewsets
+from rest_framework.generics import ListCreateAPIView
+
 
 class CreateListRecordsAPIView(APIView):
     def get(self, request):
@@ -99,9 +101,21 @@ class CategoryListAPIView(APIView):
         data = serializers.CategoryAPIViewSerializers(model, many=True).data
         return Response(data=data)
 
+class ListSalonAPIView(APIView):
+    def get(self, request, id):
+        model = BusinessAccount.objects.filter(id=id)
+        data = serializers.BusinessAccountAPIViewSerializers(model, many=True).data
+        return Response(data=data)
+
 class SalonListAPIView(APIView):
     def get(self, request):
         model = BusinessAccount.objects.annotate(rtg=Count('category')
                                                ).order_by('-rtg')
         data = serializers.BusinessAccountAPIViewSerializers(model, many=True).data
         return Response(data=data)
+from user_page.serializers import BusinessAccountAPIViewSerializers
+
+class SearchSalonAPIView(ListCreateAPIView):
+    queryset = BusinessAccount.objects.all()
+    serializer_class = BusinessAccountAPIViewSerializers
+    filter_fields = ['category']
